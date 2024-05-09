@@ -33,10 +33,10 @@ class PaymentController {
             throw new Error(JSON.stringify(err));
           }
 
-          const orderdata = await req.user.createOrder({
+          const orderdata = await Order.create({
             orderId: order.id,
             status: "PENDING",
-          });
+          } as OrderData);
           res.status(201).json({ order, key_id: rzp.key_id });
         }
       );

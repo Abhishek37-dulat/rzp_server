@@ -57,8 +57,9 @@ class UserController {
         sender,
         to: receivers,
         subject: "Verify Userself",
-        htmlContent: `<p>Verify yourself: <a href="-http://localhost:3000/user/verify/:${newUser.id}">Verify yourself</a></p>`,
+        htmlContent: `<p>Verify yourself: <a href="http://localhost:3000/user/verify/${newUser.id}">Verify yourself</a></p>`,
       });
+      // console.log(tranEmailApi);
 
       res
         .status(201)

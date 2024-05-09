@@ -66,6 +66,7 @@ class ExpenseController {
         categorie,
         amount,
       }: { itemName: string; categorie: string; amount: number } = req.body;
+      console.log(req.body);
       if (!itemName || !categorie || !amount) {
         res.status(403).json({ message: "All fields are required" });
         return;
@@ -82,10 +83,7 @@ class ExpenseController {
       const user = await User.findByPk(req.user.id);
       await user?.update(
         {
-          totalCost:
-            user.totalCost === null || user.totalCost === 0
-              ? amount
-              : user.totalCost + amount,
+          totalCost: user.totalCost === 0 ? +amount : +user.totalCost + +amount,
         } as UserData,
         { transaction: t }
       );
@@ -93,7 +91,7 @@ class ExpenseController {
       res.status(201).json({ message: "Expense Created", data: expenseItem });
     } catch (error) {
       await t.rollback();
-      console.error("Error while adding Expense");
+      console.error("Error while adding Expense", error);
       res.status(500).json({ message: "Server Error" });
     }
   }
@@ -154,7 +152,7 @@ class ExpenseController {
   ): Promise<void> {
     const t = await sequelize.transaction();
     try {
-      const expenseExist = await Expense.findByPk(req.user.id, {
+      const expenseExist = await Expense.findByPk(req.params.id, {
         transaction: t,
       });
       if (!expenseExist) {

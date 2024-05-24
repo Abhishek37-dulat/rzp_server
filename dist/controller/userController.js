@@ -13,7 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const User_1 = require("../models/User");
-const bcrypt_1 = __importDefault(require("bcrypt"));
+const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const Sib = require("sib-api-v3-sdk");
 class UserController {
@@ -28,7 +28,7 @@ class UserController {
                     res.status(400).json({ error: "User already exists" });
                     return;
                 }
-                const hashedPassword = yield bcrypt_1.default.hash(password, 10);
+                const hashedPassword = yield bcryptjs_1.default.hash(password, 10);
                 const newUser = yield User_1.User.create({
                     name,
                     email,
@@ -71,7 +71,7 @@ class UserController {
                     res.status(404).json({ error: "User not found" });
                     return;
                 }
-                const isPasswordValid = yield bcrypt_1.default.compare(password, user.password);
+                const isPasswordValid = yield bcryptjs_1.default.compare(password, user.password);
                 if (!isPasswordValid) {
                     res.status(401).json({ error: "Incrrect password" });
                     return;
@@ -88,6 +88,22 @@ class UserController {
             }
             catch (error) {
                 console.error("Error while signing in: ", error);
+                res.status(500).json({ error: "Server error" });
+            }
+        });
+    }
+    static UserProfile(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const user = yield User_1.User.findOne({
+                    where: { email: req.user.email },
+                    attributes: { exclude: ["password"] },
+                });
+                console.log(user);
+                res.status(201).json({ message: "Profile Data Successful", data: user });
+            }
+            catch (error) {
+                console.error("Error in Profile: ", error);
                 res.status(500).json({ error: "Server error" });
             }
         });
@@ -153,7 +169,7 @@ class UserController {
                     res.status(403).json({ message: "User don't exist" });
                     return;
                 }
-                const hashedPassword = yield bcrypt_1.default.hash(password, 10);
+                const hashedPassword = yield bcryptjs_1.default.hash(password, 10);
                 yield userExist.update({
                     password: hashedPassword,
                 });

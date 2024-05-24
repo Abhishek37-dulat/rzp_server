@@ -1,6 +1,6 @@
 import { User } from "../models/User";
 import { Request, Response, NextFunction } from "express";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 const Sib: any = require("sib-api-v3-sdk");
@@ -109,6 +109,25 @@ class UserController {
       res.status(500).json({ error: "Server error" });
     }
   }
+
+  static async UserProfile(
+    req: Request & { user?: any },
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      const user: UserData | null = await User.findOne({
+        where: { email: req.user.email },
+        attributes: { exclude: ["password"] },
+      });
+      console.log(user);
+      res.status(201).json({ message: "Profile Data Successful", data: user });
+    } catch (error) {
+      console.error("Error in Profile: ", error);
+      res.status(500).json({ error: "Server error" });
+    }
+  }
+
   static async verifyUser(
     req: Request,
     res: Response,
